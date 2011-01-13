@@ -1,7 +1,6 @@
 Requirements:
 ==============
 - Java runtime environment
-- Minecraft Server JAR
 - Screen v4.x
 
 Optional:
