@@ -1,23 +1,25 @@
 #!/bin/bash
 # original author : Relliktsohg
 # continued contributions: Maine, endofzero
-# dopeghoti, demonspork, robbiet480
+# dopeghoti, demonspork, robbiet480,
+# UnkzDomain
 # https://github.com/endofzero/Minecraft-Sheller
 
 #	Configuration
 
 # Main
-WORLD_NAME="world"
+WORLD_NAME="RamCraft"
 OFFLINE_NAME=$WORLD_NAME-offline
-MC_PATH=/home/minecraft
+MC_PATH=/home/minecraft/ramcraft
 SCREEN_NAME="minecraft"
-MEMMAX=1536
-MEMALOC=1024
+MEMMAX=1024
+MEMALOC=512
 DISPLAY_ON_LAUNCH=0
 SERVER_OPTIONS=""
 
 # Modifications
-SERVERMOD=0
+SERVERMOD=1
+CRAFTBUKKIT_UPDATE=http://hudson.lukegb.com/job/CraftBukkit/lastSuccessfulBuild/artifact/target/craftbukkit-0.0.1-SNAPSHOT.jar
 RUNECRAFT=0
 
 # Backups
@@ -87,9 +89,9 @@ display() {
 server_launch() {
 	echo "Launching minecraft server..."
 	if [[ 1 -eq $SERVERMOD ]]; then
-		echo "Minecraft_Mod.jar"
+		echo "craftbukkit.jar"
 		cd $MC_PATH
-		screen -dmS $SCREEN_NAME java -server -Xmx${MEMMAX}M -Xms${MEMALOC}M -Djava.net.preferIPv4Stack=true $SERVER_OPTIONS -jar Minecraft_Mod.jar nogui
+		screen -dmS $SCREEN_NAME java -server -Xmx${MEMMAX}M -Xms${MEMALOC}M -Djava.net.preferIPv4Stack=true $SERVER_OPTIONS -jar craftbukkit.jar nogui
 		sleep 1
 	else
 		echo "minecraft_server.jar"
@@ -480,23 +482,25 @@ if [[ $# -gt 0 ]]; then
 			DATE=$(date +%Y-%m-%d)			
 			cd $MC_PATH
 			if [[ 1 -eq $SERVERMOD ]]; then
-				tar -czf minecraft_server-$DATE.tar.gz minecraft_server.jar Minecraft_Mod.jar
-				rm Minecraft_Mod.jar
+				tar -czf minecraft_server-$DATE.tar.gz craftbukkit.jar
+				rm craftbukkit.jar
 			else
 				tar -czf minecraft_server-$DATE.tar.gz minecraft_server.jar
 			fi
 			mv minecraft_server-$DATE.tar.gz $BKUP_PATH
 
 			echo "Downloading new binaries..."
-			wget -N http://www.minecraft.net/download/minecraft_server.jar
+			if [[0 -eq $SERVERMOD ]]; then
+			    echo "Downloading latest official binaries..."
+			    wget -N http://www.minecraft.net/download/minecraft_server.jar
+			fi
 			if [[ 1 -eq $SERVERMOD ]]; then
-				echo "Downloading hey0's serverMod..."
+				echo "Downloading latest CraftBukkit..."
 				mkdir -p ModTmp
-				cd ModTmp/
-				wget -O Minecraft_Mod.zip http://hey0.net/get.php?dl=serverbeta
-				unzip Minecraft_Mod.zip
-				cp -f version.txt $MC_PATH/version.txt
-				cp bin/Minecraft_Mod.jar $MC_PATH/Minecraft_Mod.jar
+
+								cd ModTmp/
+				wget -O craftbukkit.jar $CRAFTBUKKIT_UPDATE
+				cp craftbukkit.jar $MC_PATH/craftbukkit.jar
 				cd $MC_PATH
 				rm -rf ModTmp    
 			fi
